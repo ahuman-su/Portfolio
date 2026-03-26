@@ -3,62 +3,146 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (list) {
     const feedUrl = 'https://feeds.feedburner.com/TheHackersNews';
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
+    const sources = [
+      {
+        name: 'rss2json',
+        type: 'json',
+        url: `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`,
+      },
+      {
+        name: 'allorigins-json',
+        type: 'xml-json',
+        url: `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`,
+      },
+      {
+        name: 'allorigins-raw',
+        type: 'xml',
+        url: `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`,
+      },
+    ];
 
-    fetch(proxyUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+    const parseDate = (value) => {
+      if (!value) {
+        return null;
+      }
+
+      const normalizedValue =
+        value.includes(' ') && !value.includes('T') ? value.replace(' ', 'T') : value;
+      const date = new Date(normalizedValue);
+
+      return Number.isNaN(date.getTime()) ? null : date;
+    };
+
+    const parseXmlItems = (xmlText) => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xmlText, 'application/xml');
+
+      if (doc.querySelector('parsererror')) {
+        throw new Error('Flux XML invalide');
+      }
+
+      const items = Array.from(doc.querySelectorAll('item'))
+        .slice(0, 5)
+        .map((item) => ({
+          title: item.querySelector('title')?.textContent?.trim() || 'Article',
+          link: item.querySelector('link')?.textContent?.trim() || '#',
+          pubDate: item.querySelector('pubDate')?.textContent?.trim() || '',
+        }));
+
+      if (!items.length) {
+        throw new Error('Aucun article trouvé');
+      }
+
+      return items;
+    };
+
+    const parseJsonItems = (payload) => {
+      if (payload.status && payload.status !== 'ok') {
+        throw new Error('Flux JSON indisponible');
+      }
+
+      const items = Array.isArray(payload.items)
+        ? payload.items.slice(0, 5).map((item) => ({
+            title: item.title?.trim() || 'Article',
+            link: item.link?.trim() || '#',
+            pubDate: item.pubDate?.trim() || '',
+          }))
+        : [];
+
+      if (!items.length) {
+        throw new Error('Aucun article trouvé');
+      }
+
+      return items;
+    };
+
+    const renderItems = (items) => {
+      const fragment = document.createDocumentFragment();
+
+      items.forEach((item) => {
+        const li = document.createElement('li');
+        const anchor = document.createElement('a');
+        anchor.href = item.link;
+        anchor.textContent = item.title;
+        anchor.target = '_blank';
+        anchor.rel = 'noopener';
+        li.appendChild(anchor);
+
+        const date = parseDate(item.pubDate);
+        if (date) {
+          const time = document.createElement('time');
+          time.dateTime = date.toISOString();
+          time.textContent = date.toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          });
+          li.appendChild(time);
         }
-        return response.text();
-      })
-      .then((xmlText) => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xmlText, 'application/xml');
-        const items = Array.from(doc.querySelectorAll('item')).slice(0, 5);
 
-        if (!items.length) {
-          throw new Error('Aucun article trouvÃ©');
-        }
+        fragment.appendChild(li);
+      });
 
-        const fragment = document.createDocumentFragment();
+      list.innerHTML = '';
+      list.appendChild(fragment);
+    };
 
-        items.forEach((item) => {
-          const title = item.querySelector('title')?.textContent?.trim() || 'Article';
-          const link = item.querySelector('link')?.textContent?.trim() || '#';
-          const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
+    const loadNews = async () => {
+      for (const source of sources) {
+        try {
+          const response = await fetch(source.url);
 
-          const li = document.createElement('li');
-          const anchor = document.createElement('a');
-          anchor.href = link;
-          anchor.textContent = title;
-          anchor.target = '_blank';
-          anchor.rel = 'noopener';
-
-          li.appendChild(anchor);
-
-          if (pubDate) {
-            const time = document.createElement('time');
-            const date = new Date(pubDate);
-            if (!Number.isNaN(date.getTime())) {
-              time.dateTime = date.toISOString();
-              time.textContent = date.toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              });
-              li.appendChild(time);
-            }
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
           }
 
-          fragment.appendChild(li);
-        });
+          if (source.type === 'json') {
+            const payload = await response.json();
+            return parseJsonItems(payload);
+          }
 
-        list.innerHTML = '';
-        list.appendChild(fragment);
-      })
+          if (source.type === 'xml-json') {
+            const payload = await response.json();
+            if (!payload.contents) {
+              throw new Error('Réponse proxy vide');
+            }
+            return parseXmlItems(payload.contents);
+          }
+
+          const xmlText = await response.text();
+          return parseXmlItems(xmlText);
+        } catch (error) {
+          console.warn(`Échec du chargement RSS via ${source.name}`, error);
+        }
+      }
+
+      throw new Error('Toutes les sources RSS ont échoué');
+    };
+
+    loadNews()
+      .then(renderItems)
       .catch(() => {
-        list.innerHTML = '<li>Impossible de charger les actualitÃ©s pour le moment.</li>';
+        list.innerHTML = '<li>Impossible de charger les actualités pour le moment.</li>';
       });
   }
 
