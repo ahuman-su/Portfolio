@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>un_humain — Présentation</title>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container hero">
+      <img id="profile-image" src="finale.png" alt="Image de profil" />
+      <h1 id="username-container">
+        <span id="username" class="site-title">un_humain</span>
+      </h1>
+      <p class="tagline">Portfolio réalisé dans le cadre du BTS SIO.</p>
+      <p class="dev-line"><span class="dev-prompt">$</span> profil orienté cybersécurité, développement et projets techniques</p>
+
+      <a class="btn" href="mailto:titouan.pelou@gmail.com">Me contacter</a>
+      <button id="theme-toggle" class="btn" type="button" aria-pressed="false">Mode clair</button>
+      <nav class="hero-nav" aria-label="Navigation rapide">
+        <a class="chip is-active" href="index.html" aria-current="page">Accueil</a>
+        <a class="chip" href="bts.html">BTS</a>
+        <a class="chip" href="projects.html">Projets</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content container">
+    <section class="cards">
+      <article id="about" class="card highlight full-row">
+        <h2>À propos de moi</h2>
+        <p>Site de présentation qui permet d'avoir un aperçu de qui je suis.</p>
+        <p>BTS SIO (Services Informatiques aux Organisations) : formation en deux ans orientée développement, cybersécurité et support informatique pour accompagner les entreprises dans leurs projets numériques.</p>
+      </article>
+
+      <article id="bts-preview" class="card highlight">
+        <h2>BTS SIO</h2>
+        <p>Une page dédiée regroupe l'historique de mes compétences BTS SIO, les trois blocs de compétences et le téléchargement du tableau de synthèse au format Excel.</p>
+        <div class="links bts-links">
+          <a class="chip" href="bts.html">Ouvrir la page BTS</a>
+        </div>
+      </article>
+
+      <article id="contact" class="card highlight">
+        <h2>Contact</h2>
+        <p>
+          Email :
+          <a class="link" href="mailto:titouan.pelou@gmail.com">titouan.pelou@gmail.com</a>
+        </p>
+        <div class="links">
+          <a class="chip" href="https://github.com/ahuman-su" target="_blank" rel="noopener">Github</a>
+          <a class="chip" href="https://tryhackme.com/p/Ledanseur" target="_blank" rel="noopener">TryHackMe</a>
+          <a class="chip" href="https://www.root-me.org/loli-604560?lang=fr#fe1967ff9ad0d55586c1c7092aa60817" target="_blank" rel="noopener">RootMe</a>
+          <a class="chip" href="https://cyberdefenders.org/p/unhumain" target="_blank" rel="noopener">cyberdefenders</a>
+          <a class="chip" href="https://app.letsdefend.io/user/unhumain" target="_blank" rel="noopener">letsdefend</a>
+        </div>
+      </article>
+
+      <article id="news" class="card highlight">
+        <h2>Actualités cybersécurité</h2>
+        <p>Dernières infos depuis The Hacker News :</p>
+        <ul id="news-list" class="news-list">
+          <li>Chargement des actualités…</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

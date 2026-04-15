@@ -1,0 +1,42 @@
+.codex
+
+# OS / fichiers système
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Éditeurs / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environnement
+.env
+.env.*
+!.env.example
+
+# Dépendances
+node_modules/
+
+# Builds / exports / caches
+dist/
+build/
+out/
+protected/
+.build-staticrypt/
+.cache/
+coverage/
+
+# Archives / temporaires
+*.tmp
+*.temp
+*.bak
